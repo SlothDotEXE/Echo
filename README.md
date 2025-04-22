@@ -13,7 +13,7 @@ Minimal, clean web app that turns an **uploaded MP3** into plain‑text using Op
 
 ## ✨ Live demo screenshot
 
-![UI screenshot](docs/screenshot.png) <!-- optional -->
+![UI screenshot](docs/screenshot.png)
 
 ---
 
@@ -22,8 +22,8 @@ Minimal, clean web app that turns an **uploaded MP3** into plain‑text using Op
 ### 1 · Clone & cd
 
 ```bash
-git clone https://github.com/<you>/whisper-transcriber.git
-cd whisper-transcriber
+git clone https://github.com/SlothDotEXE/Echo.git
+cd Echo
 ```
 
 ### 2 · Backend (setup once)
