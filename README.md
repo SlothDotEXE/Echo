@@ -70,10 +70,10 @@ For a full SPA + API deployment (e.g. Docker, Fly, Render), bundle:
 
 # 🚀 Roadmap
 
+- ✅ Dark/light theme toggle
+
 - ⬜ Drag‑and‑drop uploads
 
 - ⬜ Persistent transcript history (SQLite)
-
-- ⬜ Dark/light theme toggle
 
 - ⬜ Selectable Models (tiny, base,small,medium,large,turbo)

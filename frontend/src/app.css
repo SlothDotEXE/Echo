@@ -1,6 +1,25 @@
 /* Typeface + reset */
+:root {
+  --bg:     #fafafa;
+  --text:   #111111;
+  --primary:#111111;
+  --border: #ddd;
+}
+
+[data-theme="dark"] {
+  --bg:     #111111;
+  --text:   #fafafa;
+  --primary:#fafafa;
+  --border: #444;
+}
+
+
 * { margin:0; box-sizing:border-box; font-family: 'Inter', sans-serif; }
-body { background:#fafafa; color:#111; line-height:1.4; }
+body {
+  background: var(--bg);
+  color:      var(--text);
+  line-height:1.4;
+}
 h1 { font-size:1.8rem; font-weight:600; margin-bottom:1rem; }
 h2 { font-size:1.2rem; font-weight:500; margin:1.5rem 0 .5rem; }
 
@@ -19,11 +38,12 @@ form {
 
 .upload {
   flex:1;
-  background:#fff;
-  border:1px solid #ddd;
+  background: var(--bg);
+  border:1px solid var(--border);
   padding:0.75rem;
   cursor:pointer;
   user-select:none;
+  color: var(--text);
 }
 
 .upload input { display:none; }
@@ -31,8 +51,8 @@ form {
 button {
   padding:0.75rem 1rem;
   border:none;
-  background:#111;
-  color:#fff;
+  background: var(--primary);
+  color:      var(--bg);
   cursor:pointer;
   transition:opacity .2s;
 }
@@ -41,7 +61,8 @@ button:disabled { opacity:.5; cursor:default; }
 
 .output pre {
   white-space:pre-wrap;
-  background:#fff;
-  border:1px solid #eee;
+  background: var(--bg);
+  color:      var(--text);
+  border:1px solid var(--border);
   padding:1rem;
 }

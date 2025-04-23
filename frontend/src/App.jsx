@@ -1,9 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function App() {
   const [file, setFile] = useState(null);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Theme toggling
+const [theme, setTheme] = useState(
+  () => localStorage.getItem("theme") || "light"
+);
+
+useEffect(() => {
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem("theme", theme);
+}, [theme]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -24,6 +34,15 @@ export default function App() {
 
   return (
     <main className="wrapper">
+      <button
+  onClick={() =>
+    setTheme((prev) => (prev === "light" ? "dark" : "light"))
+  }
+  style={{ marginBottom: "1rem" }}
+>
+  {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
+</button>
+
       <h1>Whisper Transcriber</h1>
 
       <form onSubmit={handleSubmit}>
