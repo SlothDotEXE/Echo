@@ -13,7 +13,7 @@ Minimal, clean web app that turns an **uploaded MP3** into plain‑text using Op
 
 ## ✨ Live demo screenshot
 
-![UI screenshot](docs/screenshot.png)
+![UI screenshot](docs/Echo.gif)
 
 ---
 
