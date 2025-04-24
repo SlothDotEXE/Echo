@@ -72,8 +72,10 @@ For a full SPA + API deployment (e.g. Docker, Fly, Render), bundle:
 
 - ✅ Dark/light theme toggle
 
+- ✅ Selectable Models (tiny, base,small,medium,large,turbo)
+
 - ⬜ Drag‑and‑drop uploads
 
 - ⬜ Persistent transcript history (SQLite)
 
-- ⬜ Selectable Models (tiny, base,small,medium,large,turbo)
+- ⬜ Highlight active word in transcription 
