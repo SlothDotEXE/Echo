@@ -4,6 +4,8 @@ export default function App() {
   const [file, setFile] = useState(null);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+  const MODELS = ["tiny", "base", "small", "medium", "large", "turbo"];
+  const [model, setModel] = useState("base");
 
   // Theme toggling
 const [theme, setTheme] = useState(
@@ -21,6 +23,7 @@ useEffect(() => {
 
     const body = new FormData();
     body.append("file", file);
+    body.append("model", model);
     setLoading(true);
 
     const res = await fetch("http://localhost:8000/transcribe", {
@@ -46,6 +49,13 @@ useEffect(() => {
       <h1>Whisper Transcriber</h1>
 
       <form onSubmit={handleSubmit}>
+        {/* ── NEW ── model selector ───────── */}
+  <label style={{marginBottom:"1rem"}}>
+    Model&nbsp;
+    <select value={model} onChange={e => setModel(e.target.value)}>
+      {MODELS.map(m => <option key={m} value={m}>{m}</option>)}
+    </select>
+  </label>
         <label className="upload">
           <input
             type="file"
