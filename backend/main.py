@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import whisper, uvicorn, tempfile, shutil, os, uuid
 
+model = whisper.load_model("base")
+
 ALLOWED = {"tiny","base","small","medium","large","large-v2","turbo"}  # turbo in whisper-cpp
 _model_cache: dict[str, whisper.Whisper] = {}
 
@@ -20,8 +22,7 @@ app.add_middleware(CORSMiddleware,
 
 @app.post("/transcribe")
 async def transcribe(
-    file: UploadFile = File(...),
-    model: str = Form("base")        
+    file: UploadFile = File(...)      
 ):
     wav_path = None
     try:
@@ -29,13 +30,8 @@ async def transcribe(
             shutil.copyfileobj(file.file, tmp)
             wav_path = tmp.name
 
-        result = get_model(model).transcribe(wav_path)
-        return JSONResponse({
-            "id": str(uuid.uuid4()),
-            "filename": file.filename,
-            "model": model,
-            "text": result["text"].strip()
-        })
+        result = model.transcribe(wav_path)
+        return JSONResponse({"text": result["text"]})
     finally:
         if wav_path and os.path.exists(wav_path):
             os.unlink(wav_path)
