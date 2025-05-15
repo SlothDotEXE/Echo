@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const MODELS = [
   "tiny", "base", "small", "medium", "large", "large-v2"
@@ -10,29 +10,61 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState("");
-  const [darkMode, setDarkMode] = useState(true); // default dark mode
+  const [darkMode, setDarkMode] = useState(true);
+  const [dragActive, setDragActive] = useState(false);
+  const inputRef = useRef();
 
-  // Set dark mode on initial mount
   useEffect(() => {
     document.body.classList.toggle("dark", darkMode);
   }, [darkMode]);
+
+  const validateFile = (f) => {
+    const validTypes = ["audio/mp3", "audio/mpeg", "audio/wav", "audio/x-wav", "audio/x-m4a", "audio/flac", "audio/ogg"];
+    if (!validTypes.includes(f.type)) {
+      setError("Unsupported file type.");
+      setFile(null);
+      return false;
+    }
+    if (f.size > 40 * 1024 * 1024) {
+      setError("File too large (max 40MB).");
+      setFile(null);
+      return false;
+    }
+    setError("");
+    setFile(f);
+    return true;
+  };
 
   const handleFileChange = (e) => {
     setError("");
     const f = e.target.files[0];
     if (!f) return;
-    const validTypes = ["audio/mp3", "audio/mpeg", "audio/wav", "audio/x-wav", "audio/x-m4a", "audio/flac", "audio/ogg"];
-    if (!validTypes.includes(f.type)) {
-      setError("Unsupported file type.");
-      setFile(null);
-      return;
+    validateFile(f);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      validateFile(e.dataTransfer.files[0]);
     }
-    if (f.size > 40 * 1024 * 1024) {
-      setError("File too large (max 40MB).");
-      setFile(null);
-      return;
-    }
-    setFile(f);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const handleClickDropZone = () => {
+    inputRef.current.click();
   };
 
   const handleSubmit = async (e) => {
@@ -71,6 +103,10 @@ export default function App() {
       <form
         onSubmit={handleSubmit}
         className="transcribe-form"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        autoComplete="off"
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h2>Echo Transcriber</h2>
@@ -89,10 +125,34 @@ export default function App() {
             {MODELS.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
         </label>
-        <label>
-          <span>Audio File</span>
-          <input type="file" accept="audio/*" onChange={handleFileChange} />
-        </label>
+
+        {/* Drag-and-drop zone */}
+        <div
+          className={`drop-zone${dragActive ? " active" : ""}`}
+          onClick={handleClickDropZone}
+          tabIndex={0}
+          onKeyDown={e => {
+            if (e.key === " " || e.key === "Enter") handleClickDropZone();
+          }}
+          aria-label="Click or drag file here to upload"
+        >
+          <input
+            type="file"
+            accept="audio/*"
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+            ref={inputRef}
+            tabIndex={-1}
+          />
+          <span>
+            {file
+              ? `Selected: ${file.name}`
+              : dragActive
+                ? "Drop your audio file here…"
+                : "Click or drag audio file here to upload"}
+          </span>
+        </div>
+
         <button
           type="submit"
           disabled={loading}
@@ -116,7 +176,7 @@ export default function App() {
           <pre>{result}</pre>
         </div>
       )}
-      {/* Styling for dark/light mode and layout */}
+      {/* Styling for dark/light mode, drag-drop, and layout */}
       <style>{`
         :root {
           --bg: #f6f8fa;
@@ -126,6 +186,9 @@ export default function App() {
           --error-bg: #fee2e2;
           --error-text: #b91c1c;
           --shadow: 0 2px 16px #0001;
+          --drop-border: #cbd5e1;
+          --drop-bg: #f1f5f9;
+          --drop-active-bg: #e0e7ef;
         }
         body.dark, .app-container.dark {
           --bg: #18181b;
@@ -135,6 +198,9 @@ export default function App() {
           --error-bg: #4b1d1d;
           --error-text: #fecaca;
           --shadow: 0 2px 20px #0004;
+          --drop-border: #334155;
+          --drop-bg: #18181b;
+          --drop-active-bg: #282a36;
         }
         body, .app-container {
           background: var(--bg);
@@ -164,10 +230,26 @@ export default function App() {
         .transcribe-form label {
           font-weight: 500; display: flex; flex-direction: column; gap: 4px;
         }
-        .transcribe-form select,
-        .transcribe-form input[type="file"] {
+        .transcribe-form select {
           margin-top: 4px; border-radius: 8px; padding: 6px;
           border: 1px solid #e5e7eb; background: var(--bg); color: var(--text);
+        }
+        .drop-zone {
+          background: var(--drop-bg);
+          border: 2px dashed var(--drop-border);
+          border-radius: 10px;
+          padding: 24px 8px;
+          text-align: center;
+          cursor: pointer;
+          color: var(--text);
+          margin-bottom: 4px;
+          font-size: 1.03em;
+          outline: none;
+          transition: background 0.2s, border-color 0.2s;
+        }
+        .drop-zone.active {
+          background: var(--drop-active-bg);
+          border-color: var(--accent);
         }
         .submit-btn {
           margin-top: 10px; padding: 12px 0;
