@@ -1,81 +1,88 @@
-# Whisper Transcriber 🗣️➡️📜
+# Echo
 
-Minimal, clean web app that turns an **uploaded MP3** into plain‑text using OpenAI Whisper on your **local GPU**.
+A minimal, fast, and modern web app for transcribing audio files using OpenAI’s Whisper models on your own GPU.
 
-| Stack | Version |
-|-------|---------|
-| **Backend** | Python 3.10 + [FastAPI] |
-| **Model** | [openai‑whisper] (runs on CPU or CUDA GPU) |
-| **Frontend** | React 18 + [Vite] |
-| **Dev server ports** | 8000 (backend) & 5173 (frontend) |
+---
+## Live Demo Screenshot
+
+![UI screenshot](docs/echo.png)
+
+---
+## Features
+
+- 🎙️ **Audio transcription:** Upload or drag-and-drop an audio file (mp3, wav, m4a, flac, ogg) and get instant transcriptions.
+- 🚀 **Runs locally:** No cloud cost or privacy concerns—everything runs on your own GPU.
+- 🌙 **Dark mode (default):** Toggleable dark/light theme for comfortable use.
+- 🏷️ **Multi-model selection:** Pick from all major Whisper models (tiny, base, small, medium, large, etc.).
+- 📦 **Drag-and-drop support:** Fast, easy, and intuitive uploads.
+- 🧩 **Responsive UI:** Works well on desktop and mobile.
+- 🔎 **Clear error handling:** Get helpful feedback if something goes wrong.
+- 🧮 **Modern tech:** FastAPI backend, React frontend.
 
 ---
 
-## ✨ Live demo screenshot
+# Getting Started
 
-![UI screenshot](docs/Echo.gif)
+## Prerequisites
+
+- Python 3.9+ (with CUDA for GPU)
+- Node.js (for frontend)
+
+### Setup (Backend)
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+```
+
+### Setup (Frontend)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+> By default, the frontend expects the backend at `http://localhost:8000`.
 
 ---
 
-## 🔧 Quick start
+# API
 
-### 1 · Clone & cd
+## `POST /transcribe`
 
-```bash
-git clone https://github.com/SlothDotEXE/Echo.git
-cd Echo
-```
+- **Body:** `multipart/form-data`
+    - `file`: Audio file to transcribe
+    - `model_name` (optional): Whisper model (`tiny`, `base`, etc.; default is `base`)
+- **Response:**  
+    - `{ "text": "Transcribed text..." }`
+- **Errors:**  
+    - `{ "error": "Descriptive message..." }`
 
-### 2 · Backend (setup once)
-
-```bash
-python -m venv .venv        # create local venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r backend/requirements.txt
-```
-
-### 3 · Frontend (Node ≥ 18)
-
-```bash
-cd frontend
-npm install        # grabs React/Vite deps
-```
-
-### 4 · Run in dev mode (two terminals)
-```bash
-# —— terminal 1 ——
-source .venv/bin/activate
-python backend/main.py       # http://localhost:8000
-
-# —— terminal 2 ——
-cd frontend
-npm run dev                  # http://localhost:5173
-```
-
-Open http://localhost:5173, upload an MP3, click Transcribe → watch the text appear.
-
-# 🛠️ Production build (optional)
-```bash
-# Build static assets
-cd frontend
-npm run build          # outputs to dist/
-
-# Serve with any static host or use Vite preview
-npm run preview
-```
-
-For a full SPA + API deployment (e.g. Docker, Fly, Render), bundle:
-1. ```uvicorn backend.main:app```
-2.  Static ```frontend/dist``` files served by nginx or FastAPI’s ```StaticFiles```.
+---
 
 # 🚀 Roadmap
 
-- ✅ Dark/light theme toggle
+## ✅ Completed
 
-- ✅ Selectable Models (tiny, base,small,medium,large,turbo)
+- [x] **Dark mode** as default, with toggle button.
+- [x] **Multi-model selection** in UI and backend.
+- [x] **Drag-and-drop** file upload support.
+- [x] **Client-side file validation** (type/size).
+- [x] **Async backend endpoint** with model caching for fast, concurrent requests.
+- [x] **Clear inline error handling** for common issues.
+- [x] **Responsive UI** for mobile/desktop.
 
-- ⬜ Drag‑and‑drop uploads
+## 🚧 Planned / Ideas
 
-- ⬜ Persistent transcript history (SQLite)
-
-- ⬜ Highlight active word in transcription 
+- [ ] Display timestamps and segments from transcription.
+- [ ] Copy-to-clipboard button for results.
+- [ ] Server-side rate limiting and abuse protection.
+- [ ] Toast notifications for upload/result.
+- [ ] Dockerization for simple deployment.
+- [ ] Healthcheck endpoint for backend.
+- [ ] API docs and improved usage guides.
+- [ ] Automated tests.
