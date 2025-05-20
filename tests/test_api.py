@@ -1,6 +1,12 @@
 import pytest
 from fastapi.testclient import TestClient
 from backend import main
+import pytest # ensure pytest is imported for the fixture
+
+# Fixture to clear request log before each test
+@pytest.fixture(autouse=True)
+def clear_request_log_fixture():
+    main.REQUEST_LOG.clear()
 
 # Dummy audio content for testing (not a real audio, but sufficient for file upload)
 DUMMY_AUDIO = b"\x00\x00\x00\x00"
@@ -65,5 +71,4 @@ def test_rate_limiting(monkeypatch):
     assert resp.status_code == 429
     data = resp.json()
     assert "error" in data and "Too many requests" in data["error"]
-    # Reset request log for other tests
-    main.REQUEST_LOG.clear()
+    # main.REQUEST_LOG.clear() # No longer needed here due to the autouse fixture
