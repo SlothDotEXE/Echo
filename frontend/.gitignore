@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# ─── Python virtual-environment directories ────────────────────────────────────
+backend/venv/
+.venv/
+venv/
+**/venv/
+**/.venv/

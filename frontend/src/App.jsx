@@ -8,35 +8,50 @@ export default function App() {
   const [file, setFile] = useState(null);
   const [model, setModel] = useState("base");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [result, setResult] = useState("");
   const [darkMode, setDarkMode] = useState(true);
   const [dragActive, setDragActive] = useState(false);
+  const [segments, setSegments] = useState([]);
+  const [toastMsg, setToastMsg] = useState("");
+  const [toastType, setToastType] = useState("");
   const inputRef = useRef();
+  const toastTimeoutRef = useRef(null);
 
   useEffect(() => {
     document.body.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
+  const showToast = (message, type) => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    setToastMsg(message);
+    setToastType(type);
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMsg("");
+      setToastType("");
+      toastTimeoutRef.current = null;
+    }, 3000);
+  };
+
   const validateFile = (f) => {
     const validTypes = ["audio/mp3", "audio/mpeg", "audio/wav", "audio/x-wav", "audio/x-m4a", "audio/flac", "audio/ogg"];
     if (!validTypes.includes(f.type)) {
-      setError("Unsupported file type.");
+      showToast("Unsupported file type.", "error");
       setFile(null);
       return false;
     }
     if (f.size > 40 * 1024 * 1024) {
-      setError("File too large (max 40MB).");
+      showToast("File too large (max 40MB).", "error");
       setFile(null);
       return false;
     }
-    setError("");
     setFile(f);
+    showToast(`File ready: ${f.name}`, "success");
     return true;
   };
 
   const handleFileChange = (e) => {
-    setError("");
     const f = e.target.files[0];
     if (!f) return;
     validateFile(f);
@@ -69,10 +84,10 @@ export default function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setResult("");
+    setSegments([]);
     if (!file) {
-      setError("Please select an audio file.");
+      showToast("Please select an audio file.", "error");
       return;
     }
     setLoading(true);
@@ -91,10 +106,32 @@ export default function App() {
       }
       const data = await resp.json();
       setResult(data.text);
+      setSegments(data.segments || []);
     } catch (err) {
-      setError(err.message || "Unknown error.");
+      showToast(err.message || "Unknown error.", "error");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopy = () => {
+    if (result) {
+      navigator.clipboard.writeText(result);
+      showToast("Copied transcription to clipboard.", "success");
+    }
+  };
+
+  const formatTime = (sec) => {
+    let minutes = Math.floor(sec / 60);
+    const seconds = sec - minutes * 60;
+    const hours = Math.floor(minutes / 60);
+    minutes = minutes % 60;
+    const minutesStr = String(minutes).padStart(2, '0');
+    const secondsStr = seconds.toFixed(1).padStart(4, '0');
+    if (hours > 0) {
+      return String(hours).padStart(2, '0') + ':' + minutesStr + ':' + secondsStr;
+    } else {
+      return minutesStr + ':' + secondsStr;
     }
   };
 
@@ -160,9 +197,6 @@ export default function App() {
         >
           {loading ? "Transcribing..." : "Transcribe"}
         </button>
-        {error && (
-          <div className="error-msg">{error}</div>
-        )}
         {loading && (
           <div className="loading-spinner">
             <span className="spinner"></span>
@@ -170,12 +204,37 @@ export default function App() {
           </div>
         )}
       </form>
+
       {result && (
         <div className="result-card">
-          <h3>Transcription</h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <h3>Transcription</h3>
+            <button 
+              type="button" 
+              className="toggle-btn" 
+              onClick={handleCopy} 
+              aria-label="Copy transcription to clipboard"
+            >
+              📋
+            </button>
+          </div>
           <pre>{result}</pre>
+          {segments.length > 0 && (
+            <div className="segments-list">
+              {segments.map((seg, idx) => (
+                <p key={idx}>
+                  <strong>{formatTime(seg.start)} - {formatTime(seg.end)}:</strong> {seg.text}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
       )}
+
+      {toastMsg && (
+        <div className={`toast ${toastType}`}>{toastMsg}</div>
+      )}
+
       {/* Styling for dark/light mode, drag-drop, and layout */}
       <style>{`
         :root {
@@ -267,10 +326,6 @@ export default function App() {
           margin-left: 10px; transition: color 0.15s;
           color: var(--accent);
         }
-        .error-msg {
-          margin-top: 8px; color: var(--error-text); background: var(--error-bg);
-          border-radius: 8px; padding: 12px; font-size: 0.97em; text-align: center;
-        }
         .loading-spinner {
           display: flex; flex-direction: row; align-items: center; gap: 8px; margin-top: 8px;
           color: var(--accent);
@@ -293,15 +348,36 @@ export default function App() {
           max-width: 600px;
           width: 100%;
         }
-        .result-card h3 { font-weight: 600; margin-bottom: 10px;}
-        .result-card pre { white-space: pre-wrap; word-break: break-word; font-size: 1.08em; line-height: 1.5;}
+        .result-card h3 {
+          font-weight: 600; margin-bottom: 10px;
+        }
+        .result-card pre {
+          white-space: pre-wrap; word-break: break-word;
+          font-size: 1.08em; line-height: 1.5;
+        }
+        .segments-list { margin-top: 12px; }
+        .segments-list p { margin: 4px 0; }
+        .segments-list strong { color: var(--accent); }
+        .toast {
+          position: fixed; bottom: 20px; left: 50%;
+          transform: translateX(-50%);
+          background: var(--card-bg); color: var(--text);
+          padding: 12px 20px; border-radius: 8px;
+          box-shadow: var(--shadow);
+        }
+        .toast.success {
+          background: #d1fae5; color: #065f46;
+        }
+        .toast.error {
+          background: var(--error-bg); color: var(--error-text);
+        }
         @keyframes spin {
-          0% { transform: rotate(0deg);}
-          100% { transform: rotate(360deg);}
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
         @media (max-width: 500px) {
-          .transcribe-form {padding: 18px; border-radius: 12px;}
-          .result-card {padding: 12px; border-radius: 10px;}
+          .transcribe-form { padding: 18px; border-radius: 12px; }
+          .result-card { padding: 12px; border-radius: 10px; }
         }
       `}</style>
     </div>

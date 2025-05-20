@@ -18,6 +18,10 @@ A minimal, fast, and modern web app for transcribing audio files using OpenAI’
 - 🧩 **Responsive UI:** Works well on desktop and mobile.
 - 🔎 **Clear error handling:** Get helpful feedback if something goes wrong.
 - 🧮 **Modern tech:** FastAPI backend, React frontend.
+- 📋 **Copy to clipboard:** Quickly copy transcription results with a dedicated button.
+- ⏱️ **Timestamped transcription segments:** View the timestamp for each segment of the transcription.
+- 🔔 **Toast notifications:** Visual feedback for file selection, transcription completion, and errors.
+- 🐳 **Dockerized deployment:** Easily run the entire app in a container.
 
 ---
 
@@ -25,8 +29,8 @@ A minimal, fast, and modern web app for transcribing audio files using OpenAI’
 
 ## Prerequisites
 
-- Python 3.9+ (with CUDA for GPU)
-- Node.js (for frontend)
+- Python 3.9+ (with PyTorch and CUDA for GPU acceleration)
+- Node.js (for building the frontend, if not using Docker)
 
 ### Setup (Backend)
 
@@ -35,6 +39,7 @@ cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
+# (If PyTorch is not installed via requirements, install it separately as needed)
 python main.py
 ```
 
@@ -58,11 +63,37 @@ npm run dev
     - `file`: Audio file to transcribe
     - `model_name` (optional): Whisper model (`tiny`, `base`, etc.; default is `base`)
 - **Response:**  
-    - `{ "text": "Transcribed text..." }`
+    - `{ "text": "Transcribed text...", "segments": [ { "start": 0.0, "end": 5.2, "text": "Segment text..." }, ... ] }`
 - **Errors:**  
     - `{ "error": "Descriptive message..." }`
 
+> Note: The `/transcribe` endpoint is rate-limited to 5 requests per minute per IP to prevent abuse.
+
+## `GET /health`
+
+- **Response**: `{ "status": "ok" }`
+- **Purpose**: Simple health check endpoint (useful for monitoring or load balancers).
+
+**API Documentation**: Interactive API docs are available at the built-in Swagger UI `(/docs)` and Redoc `(/redoc)` endpoints when the server is running.
+
 ---
+
+# Docker
+
+```bash
+docker build -t echo .
+docker run -p 8000:8000 --gpus all echo
+```
+The app will be available at http://localhost:8000. The React frontend is served on the same port, and the FastAPI endpoints (e.g. /transcribe, /health) are accessible under the same base URL. The --gpus all flag is optional (use it if you have an NVIDIA GPU and NVIDIA Docker configured to enable GPU acceleration inside the container).
+
+# Testing
+
+To run the automated tests, install development dependencies (e.g. `pip install pytest requests`) and then execute:
+
+```bash
+pytest
+```
+This will run the test suite, which covers the health endpoint, transcription (using a dummy model for speed), invalid model handling, and rate limiting.
 
 # 🚀 Roadmap
 
@@ -78,11 +109,11 @@ npm run dev
 
 ## 🚧 Planned / Ideas
 
-- [ ] Display timestamps and segments from transcription.
-- [ ] Copy-to-clipboard button for results.
-- [ ] Server-side rate limiting and abuse protection.
-- [ ] Toast notifications for upload/result.
-- [ ] Dockerization for simple deployment.
-- [ ] Healthcheck endpoint for backend.
-- [ ] API docs and improved usage guides.
-- [ ] Automated tests.
+- [x] Display timestamps and segments from transcription.
+- [x] Copy-to-clipboard button for results.
+- [x] Server-side rate limiting and abuse protection.
+- [x] Toast notifications for upload/result.
+- [x] Dockerization for simple deployment.
+- [x] Healthcheck endpoint for backend.
+- [x] API docs and improved usage guides.
+- [x] Automated tests.
