@@ -29,3 +29,8 @@ backend/venv/
 venv/
 **/venv/
 **/.venv/
+
+# Pytest files and directories
+tests/__pycache__/
+tests/.pytest_cache/
+backend/__pycache__/
