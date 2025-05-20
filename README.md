@@ -88,15 +88,22 @@ The app will be available at http://localhost:8000. The React frontend is served
 
 # Testing
 
-The testing dependencies (`pytest` and `requests`) are included in `backend/requirements.txt`. To run the automated tests, ensure you have installed all dependencies:
+The testing dependencies (`pytest` and `requests`) are included in `backend/requirements.txt`. To run the automated tests:
 
-```bash
-cd backend
-# source venv/bin/activate (if you use a virtual environment)
-pip install -r requirements.txt 
-# Then, from the root directory of the project:
-pytest
-```
+1.  **Navigate to the project root directory** (if you are not already there).
+2.  **Set up and activate a Python virtual environment** (recommended):
+    ```bash
+    python -m venv venv 
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    ```
+3.  **Install dependencies** (this includes `pytest` and `requests`):
+    ```bash
+    pip install -r backend/requirements.txt
+    ```
+4.  **Run tests** from the **project root directory**:
+    ```bash
+    pytest
+    ```
 This will run the test suite, which covers the health endpoint, transcription (using a dummy model for speed), invalid model handling, and rate limiting.
 
 # 🚀 Roadmap
